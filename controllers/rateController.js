@@ -1,5 +1,8 @@
 const prisma = require("../config/prisma");
-const { getCurrentRates } = require("../services/currencyRateService");
+const {
+  getCurrentRates,
+  syncExchangeRates,
+} = require("../services/currencyRateService");
 
 const getRates = async (req, res) => {
   try {
@@ -12,6 +15,26 @@ const getRates = async (req, res) => {
   }
 };
 
+const syncRates = async (req, res) => {
+  try {
+    const result = await syncExchangeRates(prisma);
+    const rates = await getCurrentRates(prisma);
+
+    return res.json({
+      message: "Ханш амжилттай шинэчлэгдлээ",
+      result,
+      rates,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(502).json({
+      message: "Ханш татахад алдаа гарлаа. Өмнөх ханш хэвээр ашиглагдана",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getRates,
+  syncRates,
 };

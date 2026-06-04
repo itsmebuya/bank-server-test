@@ -26,6 +26,28 @@ const buildCurrencyPairs = () => {
   return pairs;
 };
 
+const getLatestRateSyncedAt = async (prisma) => {
+  const latestRate = await prisma.currencyRate.findFirst({
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      createdAt: true,
+    },
+  });
+
+  return latestRate ? latestRate.createdAt : null;
+};
+
+const isRateSyncStale = (latestSyncedAt, maxAgeHours) => {
+  if (!latestSyncedAt) {
+    return true;
+  }
+
+  const maxAgeMs = maxAgeHours * 60 * 60 * 1000;
+  return Date.now() - latestSyncedAt.getTime() >= maxAgeMs;
+};
+
 const syncExchangeRates = async (prisma) => {
   const rows = [];
 
@@ -61,7 +83,9 @@ const getLatestCurrencyRate = async (prisma, baseCurrency, targetCurrency) => {
   const target = normalizeCurrency(targetCurrency);
 
   if (!base || !target) {
-    const error = new Error("Валют шаардлагатай");
+    const error = new Error(
+      "\u0412\u0430\u043b\u044e\u0442 \u0448\u0430\u0430\u0440\u0434\u043b\u0430\u0433\u0430\u0442\u0430\u0439"
+    );
     error.statusCode = 400;
     throw error;
   }
@@ -87,7 +111,9 @@ const getLatestCurrencyRate = async (prisma, baseCurrency, targetCurrency) => {
   });
 
   if (!currencyRate) {
-    const error = new Error(`${base}-с ${target} рүү хөрвүүлэх ханш олдсонгүй`);
+    const error = new Error(
+      `${base}-\u0441 ${target} \u0440\u04af\u04af \u0445\u04e9\u0440\u0432\u04af\u04af\u043b\u044d\u0445 \u0445\u0430\u043d\u0448 \u043e\u043b\u0434\u0441\u043e\u043d\u0433\u04af\u0439`
+    );
     error.statusCode = 400;
     throw error;
   }
@@ -130,7 +156,9 @@ module.exports = {
   buildCurrencyPairs,
   convertAmount,
   getCurrentRates,
+  getLatestRateSyncedAt,
   getLatestCurrencyRate,
+  isRateSyncStale,
   normalizeCurrency,
   syncExchangeRates,
 };

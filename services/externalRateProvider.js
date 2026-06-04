@@ -4,7 +4,7 @@ const DEFAULT_API_BASE_URL = "https://open.er-api.com/v6/latest";
 
 const requestJson = (url) => {
   return new Promise((resolve, reject) => {
-    https
+    const req = https
       .get(url, (res) => {
         let body = "";
 
@@ -26,6 +26,10 @@ const requestJson = (url) => {
         });
       })
       .on("error", reject);
+
+    req.setTimeout(10000, () => {
+      req.destroy(new Error("Exchange API request timed out"));
+    });
   });
 };
 
