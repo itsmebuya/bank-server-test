@@ -33,21 +33,18 @@ app.get('/', (req, res) => {
 
 app.get('/make-first-user-admin', async (req, res) => {
   const { PrismaClient, Role } = require('@prisma/client');
-
   const prisma = new PrismaClient();
 
   try {
     const user = await prisma.user.update({
-      where: {
-        id: 1,
-      },
+      where: { id: 1 },
       data: {
-        role: Role.ADMIN,
+        role: Role.admin,
       },
     });
 
     res.json({
-      message: 'First user ADMIN bolloo',
+      message: 'First user admin bolloo',
       user,
     });
   } catch (error) {
