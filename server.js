@@ -31,6 +31,28 @@ app.get('/', (req, res) => {
   res.json({ message: 'Transaction API is running' });
 });
 
+app.get('/make-first-user-admin', async (req, res) => {
+  const { PrismaClient } = require('@prisma/client');
+  const prisma = new PrismaClient();
+
+  try {
+    const user = await prisma.user.update({
+      where: { id: 1 },
+      data: { role: 'ADMIN' },
+    });
+
+    res.json({
+      message: 'First user ADMIN bolloo',
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Admin bolgoh ued aldaa garlaa',
+      error: error.message,
+    });
+  }
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/transactions', transactionRoutes);
