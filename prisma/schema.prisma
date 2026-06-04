@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  user
+  admin
+}
+
+enum TransactionType {
+  income
+  expenses
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  role      Role     @default(user)
+  createdAt DateTime @default(now())
+
+  accounts     Account[]
+  transactions Transaction[]
+}
+
+model Account {
+  id            Int      @id @default(autoincrement())
+  accountNumber String   @unique @map("account_number")
+  currency      String
+  amount        Float    @default(0)
+  accountType   String   @default("regular") @map("account_type")
+  createdAt     DateTime @default(now())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+}
+
+model Transaction {
+  id              Int      @id @default(autoincrement())
+  senderAccount   String
+  receiverAccount String
+  amount          Float
+  currency        String
+  type            TransactionType @default(expenses)
+  exchangeRate      Float?
+  convertedAmount   Float?
+  convertedCurrency String?
+  rateSource        String?
+  description     String
+  createdAt       DateTime @default(now())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+}
+
+model CurrencyRate {
+  id        Int      @id @default(autoincrement())
+  base      String
+  target    String
+  rate      Float
+  source    String
+  createdAt DateTime @default(now())
+
+  @@index([base, target, createdAt])
+}
